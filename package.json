@@ -1,0 +1,302 @@
+{
+  "name": "sonicnote-geek",
+  "displayName": "SonicNoteGeek - 音频转写与智能总结",
+  "description": "将音频录音转写为带说话人区分的对话文本，并生成结构化会议总结。支持多种ASR引擎和LLM模型。",
+  "version": "1.0.1",
+  "publisher": "sonicnote",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "audio",
+    "transcription",
+    "asr",
+    "speech-to-text",
+    "summarization"
+  ],
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "sonicnote-geek.openPanel",
+        "title": "打开音频转写面板",
+        "icon": "$(output)"
+      },
+      {
+        "command": "sonicnote-geek.quickTranscribe",
+        "title": "快速转写 (使用默认设置)",
+        "icon": "$(zap)"
+      },
+      {
+        "command": "sonicnote-geek.extractVoiceprint",
+        "title": "从当前行提取声纹样本",
+        "icon": "$(person)"
+      },
+      {
+        "command": "sonicnote-geek.openTranscribePanel",
+        "title": "打开转写面板 (右侧)",
+        "icon": { "light": "media/icon-titlebar-light.svg", "dark": "media/icon-titlebar-dark.svg" }
+      },
+      {
+        "command": "sonicnote-geek.sync",
+        "title": "同步录音",
+        "category": "SonicNoteGeek",
+        "icon": "$(sync)"
+      },
+      {
+        "command": "sonicnote-geek.login",
+        "title": "登录妙记",
+        "category": "SonicNoteGeek",
+        "icon": "$(sign-in)"
+      },
+      {
+        "command": "sonicnote-geek.logout",
+        "title": "登出妙记",
+        "category": "SonicNoteGeek"
+      },
+      {
+        "command": "sonicnote-geek.openSyncSettings",
+        "title": "妙记同步设置",
+        "category": "SonicNoteGeek",
+        "icon": "$(gear)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "sonicnote-geek.openTranscribePanel",
+          "group": "navigation"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "sonicnote-geek.openPanel",
+          "group": "sonicnote",
+          "when": "editorLangId == markdown"
+        },
+        {
+          "command": "sonicnote-geek.extractVoiceprint",
+          "group": "sonicnote",
+          "when": "editorLangId == markdown"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "sonicnote-geek.openPanel",
+          "group": "sonicnote",
+          "when": "resourceLangId == markdown"
+        }
+      ]
+    },
+    "views": {
+      "sonicnote-geek": [
+        {
+          "id": "sonicnote-geek.sidebar",
+          "name": "妙记同步",
+          "type": "webview"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "sonicnote-geek.sidebar",
+        "contents": "## SonicNoteGeek 🎤\n\n音频转写与智能总结工具。\n\n**开始使用：**\n- 打开 Markdown 文件 → [扫描 MP3](command:sonicnote-geek.scanMp3)\n- 或使用 [快速转写](command:sonicnote-geek.quickTranscribe)\n\n[打开设置](command:sonicnote-geek.openSettings)"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "sonicnote-geek",
+          "title": "SonicNoteGeek",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "SonicNoteGeek",
+      "properties": {
+        "sonicnoteGeek.asr.protocol": {
+          "type": "string",
+          "default": "openai-whisper",
+          "enum": [
+            "openai-whisper",
+            "volcengine",
+            "aliyun-dashscope",
+            "xunfei",
+            "tencent",
+            "baidu",
+            "huawei",
+            "local-openai"
+          ],
+          "description": "ASR 引擎协议"
+        },
+        "sonicnoteGeek.asr.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "ASR API Key"
+        },
+        "sonicnoteGeek.asr.apiUrl": {
+          "type": "string",
+          "default": "",
+          "description": "ASR API 端点地址"
+        },
+        "sonicnoteGeek.asr.model": {
+          "type": "string",
+          "default": "whisper-1",
+          "description": "ASR 模型名称"
+        },
+        "sonicnoteGeek.asr.language": {
+          "type": "string",
+          "default": "zh",
+          "enum": [
+            "zh",
+            "en",
+            "ja",
+            "ko",
+            "auto",
+            "yue",
+            "fr",
+            "de",
+            "es"
+          ],
+          "description": "转写语言"
+        },
+        "sonicnoteGeek.asr.secretKey": {
+          "type": "string",
+          "default": "",
+          "description": "ASR Secret Key (火山引擎/讯飞)"
+        },
+        "sonicnoteGeek.asr.appId": {
+          "type": "string",
+          "default": "",
+          "description": "ASR App ID (讯飞/华为云)"
+        },
+        "sonicnoteGeek.asr.resourceId": {
+          "type": "string",
+          "default": "",
+          "description": "ASR Resource ID (火山引擎)"
+        },
+        "sonicnoteGeek.asr.localEndpoint": {
+          "type": "string",
+          "default": "http://localhost:8000",
+          "description": "本地 ASR 服务端点"
+        },
+        "sonicnoteGeek.asr.enableSpeakerDiarization": {
+          "type": "boolean",
+          "default": false,
+          "description": "启用 ASR 内置说话人分离"
+        },
+        "sonicnoteGeek.speaker.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "启用说话人识别"
+        },
+        "sonicnoteGeek.speaker.modelType": {
+          "type": "string",
+          "default": "builtin",
+          "enum": [
+            "none",
+            "builtin",
+            "custom"
+          ],
+          "description": "说话人识别方式"
+        },
+        "sonicnoteGeek.speaker.customEndpoint": {
+          "type": "string",
+          "default": "",
+          "description": "自定义声纹识别服务地址"
+        },
+        "sonicnoteGeek.speaker.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "声纹识别服务 API Key"
+        },
+        "sonicnoteGeek.speaker.autoVoiceprint": {
+          "type": "boolean",
+          "default": false,
+          "description": "自动声纹识别"
+        },
+        "sonicnoteGeek.llm.provider": {
+          "type": "string",
+          "default": "anthropic",
+          "description": "LLM 提供商"
+        },
+        "sonicnoteGeek.llm.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "LLM API Key"
+        },
+        "sonicnoteGeek.llm.apiUrl": {
+          "type": "string",
+          "default": "https://api.anthropic.com/v1/messages",
+          "description": "LLM API 端点"
+        },
+        "sonicnoteGeek.llm.model": {
+          "type": "string",
+          "default": "claude-haiku-3-5-sonnet",
+          "description": "LLM 模型名称"
+        },
+        "sonicnoteGeek.llm.maxTokens": {
+          "type": "number",
+          "default": 4096,
+          "description": "最大 Token 数"
+        },
+        "sonicnoteGeek.llm.temperature": {
+          "type": "number",
+          "default": 0.7,
+          "description": "Temperature (创造性)"
+        },
+        "sonicnoteGeek.sync.serverUrl": {
+          "type": "string",
+          "default": "https://ainote.easylinkin.com:18048/prod-api",
+          "description": "SonicNote 服务器地址"
+        },
+        "sonicnoteGeek.sync.syncFolder": {
+          "type": "string",
+          "default": "",
+          "description": "同步文件存放目录 (绝对路径)。留空则使用工作区的默认相对路径。"
+        },
+        "sonicnoteGeek.sync.pageSize": {
+          "type": "number",
+          "default": 50,
+          "description": "每页获取的录音数量"
+        },
+        "sonicnoteGeek.sync.includeTranscript": {
+          "type": "boolean",
+          "default": true,
+          "description": "是否包含逐字转录内容"
+        },
+        "sonicnoteGeek.sync.autoSyncOnOpen": {
+          "type": "boolean",
+          "default": false,
+          "description": "启动时自动同步"
+        },
+        "sonicnoteGeek.sync.resyncIntervalMinutes": {
+          "type": "number",
+          "default": 0,
+          "description": "定时重同步间隔 (分钟), 0 表示关闭"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build:prod",
+    "build": "node esbuild.config.mjs production",
+    "build:prod": "node esbuild.config.mjs production && cp dist/extension.js ~/.vscode/extensions/sonicnote.sonicnote-geek-1.0.1/dist/extension.js && cp package.json ~/.vscode/extensions/sonicnote.sonicnote-geek-1.0.1/package.json",
+    "watch": "node esbuild.config.mjs",
+    "lint": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.4.0"
+  }
+}

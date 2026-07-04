@@ -1,0 +1,12 @@
+node_modules/
+dist/
+out/
+*.vsix
+.DS_Store
+*.log
+
+# Test fixtures
+test-fixtures/
+
+# Build output
+release/

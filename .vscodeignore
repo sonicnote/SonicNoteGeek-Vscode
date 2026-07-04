@@ -1,0 +1,13 @@
+.vscode/**
+node_modules/**
+src/**
+esbuild.config.mjs
+tsconfig.json
+.gitignore
+CLAUDE.md
+openai-asr-guide.md
+voiceprint-api-guide.md
+.claude/**
+.git/**
+*.vsix
+release/**
