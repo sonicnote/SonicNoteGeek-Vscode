@@ -2,6 +2,10 @@
 
 VS Code 扩展 — 音频转写、说话人识别、智能总结与妙记云同步。
 
+📖 官方使用文档：[ainote.easylinkin.com/#/resources/docs](https://ainote.easylinkin.com/#/resources/docs)
+
+🎬 视频教程：[B站 BV1XmJ36BEYb](https://www.bilibili.com/video/BV1XmJ36BEYb/)
+
 ## 功能
 
 ### 音频转写（ASR）

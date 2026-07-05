@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SonicNoteGeek-Vscode 极客版插件</title>
+<style>
+  :root {
+    --bg: #f7f8fa;
+    --surface: #ffffff;
+    --border: #ebedf0;
+    --text: #1d2129;
+    --text-secondary: #656a72;
+    --accent: #333;
+    --accent-light: #f0f1f3;
+    --code-bg: #1e1e2e;
+    --code-text: #cdd6f4;
+    --radius: 8px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 36px 24px 28px;
+    text-align: center;
+  }
+  .header .version {
+    display: inline-block;
+    background: var(--accent-light);
+    padding: 2px 10px;
+    border-radius: 4px;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+  }
+  .header h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 6px; }
+  .header p { font-size: 0.92rem; color: var(--text-secondary); margin-bottom: 18px; }
+  .btn-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .download-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--accent);
+    color: #fff;
+    padding: 9px 28px;
+    border-radius: 6px;
+    font-size: 0.92rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: opacity 0.15s;
+  }
+  .download-btn:hover { opacity: 0.82; }
+  .download-btn svg { width: 16px; height: 16px; }
+  .container { max-width: 700px; margin: 0 auto; padding: 24px 20px 60px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 26px;
+    margin-bottom: 14px;
+  }
+  .card h2 {
+    font-size: 1.05rem;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .card h3 { font-size: 0.92rem; margin: 16px 0 6px; font-weight: 600; }
+  .card p, .card li { color: var(--text-secondary); font-size: 0.9rem; }
+  .card ol, .card ul { padding-left: 18px; margin: 4px 0; }
+  .card li { margin-bottom: 2px; }
+  .highlight-box {
+    background: #fef9e7;
+    border: 1px solid #f9e79f;
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin: 12px 0;
+    font-size: 0.88rem;
+    color: #7d6608;
+  }
+  .highlight-box strong { color: #6e5806; }
+  .code-wrap {
+    position: relative;
+    margin: 8px 0;
+  }
+  .code-wrap pre {
+    background: var(--code-bg);
+    color: var(--code-text);
+    padding: 12px 16px;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    margin: 0;
+  }
+  .copy-btn {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: rgba(255,255,255,0.1);
+    border: none;
+    border-radius: 4px;
+    padding: 4px 7px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.15s;
+    color: #aaa;
+    line-height: 1;
+  }
+  .code-wrap:hover .copy-btn { opacity: 1; }
+  .copy-btn:hover { background: rgba(255,255,255,0.2); color: #fff; }
+  .copy-btn.copied { opacity: 1; color: #4ade80; }
+  code { font-family: "SF Mono", "Fira Code", "Cascadia Code", Consolas, monospace; }
+  .inline-code {
+    background: var(--accent-light);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 0.85em;
+    color: var(--text);
+  }
+  .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+  .feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 12px;
+    background: var(--accent-light);
+    border-radius: 6px;
+    font-size: 0.88rem;
+  }
+  .feature-item .icon { font-size: 1.2rem; flex-shrink: 0; }
+  .feature-item .text strong { color: var(--text); display: block; margin-bottom: 2px; font-size: 0.88rem; }
+  .feature-item .text span { color: var(--text-secondary); font-size: 0.82rem; }
+  .examples { display: grid; gap: 6px; }
+  .example-item {
+    background: var(--accent-light);
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-size: 0.88rem;
+  }
+  .faq-item { margin-bottom: 10px; }
+  .faq-item .q { font-weight: 600; color: var(--text); margin-bottom: 2px; font-size: 0.9rem; }
+  .faq-item .a { color: var(--text-secondary); font-size: 0.88rem; margin-left: 0; }
+  footer {
+    text-align: center;
+    padding: 20px;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+  }
+  footer a { color: var(--text-secondary); }
+  @media (max-width: 640px) {
+    .header { padding: 28px 16px 22px; }
+    .header h1 { font-size: 1.35rem; }
+    .card { padding: 18px 16px; }
+    .feature-grid { grid-template-columns: 1fr; }
+    .btn-group { gap: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="version">v1.0.1</div>
+  <h1>SonicNoteGeek-Vscode 极客版插件</h1>
+  <p>妙记官方 VS Code 扩展 — 音频转写、智能总结、云端同步，一站式音频笔记工作流。</p>
+  <div class="btn-group">
+    <a class="download-btn" href="sonicnote-geek-1.0.1.vsix" download>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      下载安装包
+    </a>
+    <a class="download-btn" href="https://github.com/sonicnote/SonicNoteGeek-Vscode" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22"/></svg>
+      GitHub / 源码
+    </a>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="card">
+    <h2>功能概览</h2>
+    <div class="feature-grid">
+      <div class="feature-item">
+        <span class="icon">🎙️</span>
+        <div class="text"><strong>音频转写</strong><span>支持 8 种 ASR 引擎，将录音转为带说话人区分的对话文本</span></div>
+      </div>
+      <div class="feature-item">
+        <span class="icon">📝</span>
+        <div class="text"><strong>智能总结</strong><span>调用 LLM 生成结构化会议总结，内置 19 套中文模板</span></div>
+      </div>
+      <div class="feature-item">
+        <span class="icon">☁️</span>
+        <div class="text"><strong>云端同步</strong><span>从妙记服务器同步录音、转写和笔记到本地 Markdown 文件</span></div>
+      </div>
+      <div class="feature-item">
+        <span class="icon">🔊</span>
+        <div class="text"><strong>声纹识别</strong><span>内置声纹提取和说话人识别，自动区分不同发言人</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>前置要求</h2>
+    <ul>
+      <li>VS Code >= 1.85.0</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>安装方法</h2>
+    <h3>方法一：直接安装 VSIX（推荐）</h3>
+    <ol>
+      <li>点击上方按钮下载 <span class="inline-code">sonicnote-geek-1.0.1.vsix</span></li>
+      <li>打开 VS Code，按 <span class="inline-code">Cmd+Shift+P</span>（Windows: <span class="inline-code">Ctrl+Shift+P</span>）打开命令面板</li>
+      <li>输入 <span class="inline-code">Extensions: Install from VSIX</span> 并选择下载的文件</li>
+      <li>安装完成后，点击左侧活动栏的 SonicNoteGeek 图标即可使用</li>
+    </ol>
+
+    <h3>方法二：命令行安装</h3>
+    <div class="code-wrap"><button class="copy-btn" title="复制" onclick="copyCode(this, 'code --install-extension sonicnote-geek-1.0.1.vsix')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button><pre><code>code --install-extension sonicnote-geek-1.0.1.vsix</code></pre></div>
+  </div>
+
+  <div class="card">
+    <h2>获取 API Key</h2>
+    <ol>
+      <li>打开妙记 App</li>
+      <li>进入「我的」→「API Key 管理」</li>
+      <li>点击「创建 Key」，复制生成的 Key（格式：<span class="inline-code">sk-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx</span>）</li>
+    </ol>
+    <div class="highlight-box">
+      <strong>重要：</strong>请妥善保管你的 API Key，它等同于登录密码。后续在 VS Code 侧边栏登录时需要用到。
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>配置与使用</h2>
+    <h3>侧边栏登录</h3>
+    <ol>
+      <li>点击 VS Code 左侧活动栏的 <strong>SonicNoteGeek</strong> 图标</li>
+      <li>侧边栏顶部显示 <span class="inline-code">⚠️ 未登录</span> 状态，点击「🔑 登录」按钮</li>
+      <li>输入从妙记 App 获取的 API Key 完成登录</li>
+      <li>登录后状态变为 <span class="inline-code">✅ 已登录</span></li>
+    </ol>
+
+    <h3>云端同步</h3>
+    <ol>
+      <li>确保已登录，点击「⚙️ 插件设置」配置同步文件夹和服务器地址</li>
+      <li>点击「🔄 文件同步」将妙记中的录音同步为本地 Markdown 文件</li>
+      <li>同步完成后，文件列表显示在侧边栏的「📁 文件目录」中</li>
+      <li>右键点击文件可执行：打开、在访达中显示、复制、删除 操作</li>
+    </ol>
+
+    <h3>音频转写与总结</h3>
+    <ol>
+      <li>点击「📄 激活页面」打开右侧转写面板</li>
+      <li>在面板中选择 Markdown 文件、配置 ASR 引擎和 LLM 模型</li>
+      <li>点击「开始转写」执行音频转文字，完成后自动生成结构化总结</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>支持的 ASR 引擎</h2>
+    <table>
+      <tr><th>引擎</th><th>标识</th></tr>
+      <tr><td>OpenAI Whisper</td><td><span class="inline-code">openai-whisper</span></td></tr>
+      <tr><td>火山引擎</td><td><span class="inline-code">volcengine</span></td></tr>
+      <tr><td>阿里云 DashScope</td><td><span class="inline-code">aliyun-dashscope</span></td></tr>
+      <tr><td>讯飞</td><td><span class="inline-code">xunfei</span></td></tr>
+      <tr><td>腾讯云</td><td><span class="inline-code">tencent</span></td></tr>
+      <tr><td>百度</td><td><span class="inline-code">baidu</span></td></tr>
+      <tr><td>华为云</td><td><span class="inline-code">huawei</span></td></tr>
+      <tr><td>本地 OpenAI 兼容</td><td><span class="inline-code">local-openai</span></td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>配置说明</h2>
+    <p>所有配置项可通过以下方式修改：</p>
+    <ul>
+      <li>VS Code 设置 → 扩展 → SonicNoteGeek</li>
+      <li>侧边栏「⚙️ 插件设置」按钮打开同步设置面板</li>
+    </ul>
+    <h3>主要配置项</h3>
+    <table>
+      <tr><th>配置项</th><th>说明</th></tr>
+      <tr><td><span class="inline-code">sonicnoteGeek.asr.protocol</span></td><td>ASR 引擎选择</td></tr>
+      <tr><td><span class="inline-code">sonicnoteGeek.asr.apiKey</span></td><td>ASR API Key</td></tr>
+      <tr><td><span class="inline-code">sonicnoteGeek.llm.provider</span></td><td>LLM 提供商</td></tr>
+      <tr><td><span class="inline-code">sonicnoteGeek.llm.apiKey</span></td><td>LLM API Key</td></tr>
+      <tr><td><span class="inline-code">sonicnoteGeek.sync.serverUrl</span></td><td>妙记服务器地址</td></tr>
+      <tr><td><span class="inline-code">sonicnoteGeek.sync.syncFolder</span></td><td>同步文件存放目录</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>常见问题</h2>
+    <div class="faq-item">
+      <p class="q">Q: API Key 在哪里获取？</p>
+      <p class="a">A: 妙记 App → 我的 → API Key 管理 中创建。如果没有看到此菜单，请更新妙记 App 到最新版本。</p>
+    </div>
+    <div class="faq-item">
+      <p class="q">Q: 安装后侧边栏没有显示？</p>
+      <p class="a">A: 右键点击 VS Code 活动栏空白处，确保 "SonicNoteGeek" 已勾选。如果仍然不显示，尝试重启 VS Code。</p>
+    </div>
+    <div class="faq-item">
+      <p class="q">Q: 同步提示"请先登录"？</p>
+      <p class="a">A: 在侧边栏顶部状态行点击「🔑 登录」按钮，输入从妙记 App 获取的 API Key 即可。登录状态会持久保存，重启 VS Code 后仍然有效。</p>
+    </div>
+    <div class="faq-item">
+      <p class="q">Q: 支持哪些 LLM 模型做总结？</p>
+      <p class="a">A: 支持 Anthropic Claude、OpenAI 及任何 OpenAI 兼容接口。内置 19 套中文总结模板，覆盖商务会议、学术交流、课堂总结、访谈记录等场景。</p>
+    </div>
+    <div class="faq-item">
+      <p class="q">Q: 转写大文件时报错？</p>
+      <p class="a">A: 大部分云 ASR 要求音频文件可通过 HTTP 访问。请确保音频文件已上传到可公开访问的地址，或使用本地 ASR 引擎（local-openai）直接读取本地文件。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>更新方法</h2>
+    <p>下载最新版 VSIX 文件，在 VS Code 中通过 <span class="inline-code">Extensions: Install from VSIX</span> 重新安装即可覆盖旧版本：</p>
+    <div class="code-wrap"><button class="copy-btn" title="复制" onclick="copyCode(this, 'code --install-extension sonicnote-geek-1.0.1.vsix --force')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button><pre><code>code --install-extension sonicnote-geek-1.0.1.vsix --force</code></pre></div>
+  </div>
+
+</div>
+
+<footer>
+  <p>SonicNoteGeek · 妙记官方 VS Code 扩展 · <a href="https://ainote.easylinkin.com" target="_blank">SonicNote 妙记</a></p>
+</footer>
+
+<script>
+function copyCode(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.classList.add('copied');
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>';
+    }, 2000);
+  }).catch(() => {});
+}
+</script>
+
+</body>
+</html>
